@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+  <title>SH-CONTACT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Kanit', sans-serif;
+      background: linear-gradient(145deg, #e8edf5 0%, #d5dce8 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .card-main {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 36px;
+      box-shadow: 0 25px 50px -10px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+      padding: 32px 28px;
+      max-width: 480px;
+      width: 100%;
+      transition: all 0.3s ease;
+    }
+
+    @media (max-width: 480px) {
+      .card-main {
+        padding: 24px 18px;
+        border-radius: 28px;
+      }
+    }
+
+    .header-icon {
+      background: linear-gradient(135deg, #4f7df3, #6c5ce7);
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+      font-size: 30px;
+      color: #fff;
+      box-shadow: 0 12px 24px -8px rgba(79, 125, 243, 0.4);
+    }
+
+    h3 {
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: #1a2639;
+      letter-spacing: -0.3px;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .sub-title {
+      text-align: center;
+      color: #6b7a8f;
+      font-size: 0.9rem;
+      font-weight: 400;
+      margin-bottom: 24px;
+      border-bottom: 2px dashed #e2e8f0;
+      padding-bottom: 16px;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .stat-item {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 12px 6px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+      transition: transform 0.2s;
+    }
+
+    .stat-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: #1a2639;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: #6b7a8f;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-item.total .stat-number {
+      color: #2d3748;
+    }
+    .stat-item.done .stat-number {
+      color: #38a169;
+    }
+    .stat-item.remain .stat-number {
+      color: #e53e3e;
+    }
+
+    /* Form */
+    .form-label {
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #2d3748;
+      margin-bottom: 6px;
+    }
+
+    .form-control,
+    .form-select {
+      border-radius: 14px;
+      border: 1.5px solid #e2e8f0;
+      padding: 12px 16px;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: all 0.25s ease;
+      font-family: 'Kanit', sans-serif;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: #4f7df3;
+      box-shadow: 0 0 0 4px rgba(79, 125, 243, 0.15);
+      background: #fff;
+    }
+
+    .form-control::placeholder {
+      color: #a0aec0;
+      font-weight: 300;
+    }
+
+    .btn-submit {
+      background: linear-gradient(135deg, #4f7df3, #6c5ce7);
+      border: none;
+      border-radius: 16px;
+      padding: 14px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #fff;
+      width: 100%;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px -6px rgba(79, 125, 243, 0.4);
+      font-family: 'Kanit', sans-serif;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px -8px rgba(79, 125, 243, 0.5);
+    }
+
+    .btn-submit:active {
+      transform: scale(0.97);
+    }
+
+    .btn-submit i {
+      font-size: 1.2rem;
+    }
+
+    /* Closed Message */
+    #closedMessage {
+      display: none;
+      background: linear-gradient(135deg, #f0fff4, #e6fffa);
+      border: 1.5px solid #68d391;
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      margin-top: 8px;
+      box-shadow: 0 8px 20px rgba(56, 161, 105, 0.15);
+    }
+
+    #closedMessage .icon-big {
+      font-size: 3.2rem;
+      color: #38a169;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    #closedMessage .msg-text {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #22543d;
+    }
+
+    #closedMessage .msg-sub {
+      font-size: 0.9rem;
+      color: #2f855a;
+      font-weight: 400;
+    }
+
+    /* Responsive fine-tune */
+    @media (max-width: 420px) {
+      .stat-number {
+        font-size: 1.4rem;
+      }
+      .stat-item {
+        padding: 8px 4px;
+      }
+      .btn-submit {
+        font-size: 0.95rem;
+        padding: 12px;
+      }
+      .card-main {
+        padding: 18px 14px;
+      }
+      .header-icon {
+        width: 54px;
+        height: 54px;
+        font-size: 26px;
+      }
+    }
+
+    /* fade animation */
+    .fade-enter {
+      animation: fadeUp 0.4s ease forwards;
+    }
+
+    @keyframes fadeUp {
+      0% {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* scrollbar style */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e0;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card-main fade-enter">
+    <!-- Header -->
+    <div class="header-icon">
+      <i class="bi bi-phone-vibrate"></i>
+    </div>
+    <h3>ช่องทางการติดต่อ</h3>
+    <div class="sub-title">กรอกข้อมูลให้ครบถ้วน</div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-item total">
+        <div class="stat-number" id="totalCount">0</div>
+        <div class="stat-label">ทั้งหมด</div>
+      </div>
+      <div class="stat-item done">
+        <div class="stat-number" id="doneCount">0</div>
+        <div class="stat-label">ส่งแล้ว</div>
+      </div>
+      <div class="stat-item remain">
+        <div class="stat-number" id="remainCount">0</div>
+        <div class="stat-label">คงเหลือ</div>
+      </div>
+    </div>
+
+    <!-- Form -->
+    <form id="contactForm">
+      <div class="mb-3">
+        <label class="form-label"><i class="bi bi-person-circle me-1"></i>ชื่อ</label>
+        <select class="form-select" id="name" required>
+          <option value="">-- เลือกชื่อ --</option>
+        </select>
+      </div>
+
+      <div class="mb-4">
+        <label class="form-label"><i class="bi bi-telephone me-1"></i> เบอร์โทรศัพท์</label>
+        <input
+          type="tel"
+          class="form-control"
+          id="phone"
+          placeholder="08xxxxxxxx"
+          maxlength="10"
+          inputmode="numeric"
+          required
+        />
+      </div>
+
+      <button class="btn-submit" type="submit">
+        <i class="bi bi-send-fill"></i> บันทึก
+      </button>
+    </form>
+
+    <!-- Closed Message (hidden by default) -->
+    <div id="closedMessage">
+      <span class="icon-big">✅</span>
+      <div class="msg-text">ส่งรายชื่อครบหมดแล้ว</div>
+      <div class="msg-sub">ระบบปิดการส่งเรียบร้อย</div>
+    </div>
+  </div>
+
+  <script type="module">
+    // ----- Firebase Imports -----
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      get
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+    // ----- Firebase Config -----
+    const firebaseConfig = {
+      apiKey: "AIzaSyCF8h3mrttJIjUPHwNzYCpzfuDE_ovfT38",
+      authDomain: "sh-contact.firebaseapp.com",
+      databaseURL: "https://sh-contact-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "sh-contact",
+      storageBucket: "sh-contact.firebasestorage.app",
+      messagingSenderId: "850820988799",
+      appId: "1:850820988799:web:d6ae6674316a1cc749244a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // ----- รายชื่อพนักงาน (แก้ไขตามต้องการ) -----
+    const employees = [
+  "สุรศักดิ์ เที่ยงตรง",
+  "เสกสรร ตะเพียนทอง",
+  "อารียา แสงจันทร์",
+  "ปราชญาทิพย์ เนตรโนนหวาย",
+  "ปิยนุช ว่าชื่น",
+  "ศศิวิมล มาตวงศ์",
+  "สิทธิศักดิ์ ใจใส",
+  "จงรัก แก้วประดิษฐ์",
+  "กรรณิกา ฤทธิณรงค์",
+  "สุพิชญา ตาระคำ",
+  "นุชนารถ ทัดปอย",
+  "ณัฐธิดา บูชาพิมพ์",
+  "รุ่งรัตน์ ราชดำเนิน"
+];
+
+
+    // ----- โหลดข้อมูลและอัปเดต UI -----
+    async function loadEmployees() {
+      const select = document.getElementById("name");
+      const totalSpan = document.getElementById("totalCount");
+      const doneSpan = document.getElementById("doneCount");
+      const remainSpan = document.getElementById("remainCount");
+      const form = document.getElementById("contactForm");
+      const closedMsg = document.getElementById("closedMessage");
+
+      try {
+        const snapshot = await get(ref(db, "contacts"));
+        const sentNames = [];
+        if (snapshot.exists()) {
+          snapshot.forEach(child => {
+            sentNames.push(child.val().name);
+          });
+        }
+
+        const total = employees.length;
+        const done = sentNames.length;
+        const remain = total - done;
+
+        // อัปเดตสถิติ
+        totalSpan.textContent = total;
+        doneSpan.textContent = done;
+        remainSpan.textContent = remain;
+
+        // สร้าง dropdown เฉพาะชื่อที่ยังไม่ส่ง
+        select.innerHTML = '<option value="">-- เลือกชื่อ --</option>';
+        employees.forEach(name => {
+          if (!sentNames.includes(name)) {
+            const opt = document.createElement("option");
+            opt.value = name;
+            opt.textContent = name;
+            select.appendChild(opt);
+          }
+        });
+
+        // ✅ ถ้าคงเหลือ 0 → ปิดการส่ง
+        if (remain === 0) {
+          form.style.display = "none";
+          closedMsg.style.display = "block";
+          // เลือกให้ sweetalert แจ้งด้วยก็ได้ (แต่ไม่จำเป็น)
+        } else {
+          form.style.display = "block";
+          closedMsg.style.display = "none";
+        }
+      } catch (err) {
+        console.error("loadEmployees error:", err);
+        // ถ้า error ให้แสดงฟอร์มไว้ก่อน
+        form.style.display = "block";
+        closedMsg.style.display = "none";
+      }
+    }
+
+    // โหลดข้อมูลครั้งแรก
+    loadEmployees();
+
+    // ----- บันทึกข้อมูลเมื่อ submit -----
+    document.getElementById("contactForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value.trim();
+
+      if (name === "") {
+        Swal.fire({
+          icon: "warning",
+          title: "กรุณาเลือกชื่อ",
+          confirmButtonColor: "#4f7df3",
+          confirmButtonText: "ตกลง",
+          timer: 2000,
+          timerProgressBar: true
+        });
+        return;
+      }
+
+      if (!/^0\d{9}$/.test(phone)) {
+        Swal.fire({
+          icon: "warning",
+          title: "เบอร์โทรไม่ถูกต้อง",
+          text: "กรุณากรอก 10 หลัก ขึ้นต้นด้วย 0",
+          confirmButtonColor: "#4f7df3",
+          confirmButtonText: "ตกลง",
+          timer: 2500,
+          timerProgressBar: true
+        });
+        return;
+      }
+
+      try {
+        await push(ref(db, "contacts"), {
+          name: name,
+          phone: phone,
+          timestamp: Date.now()
+        });
+
+        await Swal.fire({
+          icon: "success",
+          title: "บันทึกสำเร็จ!",
+          text: `ลงทะเบียน ${name} เรียบร้อย`,
+          confirmButtonColor: "#38a169",
+          confirmButtonText: "ตกลง",
+          timer: 1800,
+          timerProgressBar: true
+        });
+
+        document.getElementById("contactForm").reset();
+        await loadEmployees(); // โหลดใหม่ → ถ้าครบจะปิดฟอร์ม
+
+      } catch (err) {
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาด",
+          text: err.message || "กรุณาลองใหม่อีกครั้ง",
+          confirmButtonColor: "#e53e3e",
+          confirmButtonText: "ตกลง"
+        });
+      }
+    });
+
+    // เพิ่ม event ลบข้อความแจ้งเตือนเวลาพิมพ์
+    document.getElementById("phone").addEventListener("input", function() {
+      this.value = this.value.replace(/\D/g, '').slice(0, 10);
+    });
+  </script>
+
+</body>
+</html>
