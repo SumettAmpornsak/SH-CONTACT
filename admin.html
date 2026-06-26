@@ -9,9 +9,8 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
-  <!-- ===== jsPDF สำหรับ Export PDF ===== -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <!-- ===== html2pdf สำหรับ Export PDF (รองรับภาษาไทย) ===== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     /* (คงสไตล์เดิมทั้งหมด) */
@@ -664,51 +663,65 @@
     URL.revokeObjectURL(link.href);
   }
 
-  // ----- Export PDF (ทั้งหมด) ใช้ jsPDF + autoTable -----
+  // ----- Export PDF (ใช้ html2pdf รองรับภาษาไทย) -----
   function exportPdf() {
     if (allContacts.length === 0) {
       Swal.fire({ icon:'info', title:'ไม่มีข้อมูล', text:'ไม่พบข้อมูลสำหรับสร้าง PDF', confirmButtonColor:'#4f7df3' });
       return;
     }
-    try {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(18);
-      doc.text('รายงานการส่งข้อมูล (SH-CONTACT)', 14, 22);
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`วันที่ส่งออก: ${new Date().toLocaleString('th-TH')}`, 14, 30);
-      doc.text(`จำนวนรายการทั้งหมด: ${allContacts.length} รายการ`, 14, 36);
 
-      const tableData = allContacts.map((item, idx) => [
-        idx + 1,
-        item.name,
-        item.phone,
-        formatDate(item.timestamp)
-      ]);
+    // สร้าง element ชั่วคราวสำหรับแปลงเป็น PDF
+    const element = document.createElement('div');
+    element.style.padding = '20px';
+    element.style.fontFamily = "'Kanit', sans-serif";
+    element.style.backgroundColor = '#ffffff';
+    element.style.color = '#1a2639';
+    element.innerHTML = `
+      <h2 style="text-align:center; font-weight:600; margin-bottom:8px;">รายงานการส่งข้อมูล (SH-CONTACT)</h2>
+      <p style="text-align:center; margin-bottom:4px;">วันที่ส่งออก: ${new Date().toLocaleString('th-TH')}</p>
+      <p style="text-align:center; margin-bottom:20px;">จำนวนรายการทั้งหมด: ${allContacts.length} รายการ</p>
+      <table style="width:100%; border-collapse: collapse; font-size:14px;">
+        <thead>
+          <tr style="background:#4f7df3; color:#ffffff;">
+            <th style="padding:10px 8px; border:1px solid #ccc; text-align:center;">ลำดับ</th>
+            <th style="padding:10px 8px; border:1px solid #ccc; text-align:left;">ชื่อ</th>
+            <th style="padding:10px 8px; border:1px solid #ccc; text-align:left;">เบอร์โทร</th>
+            <th style="padding:10px 8px; border:1px solid #ccc; text-align:left;">วันที่ส่ง</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${allContacts.map((item, idx) => `
+            <tr>
+              <td style="padding:8px 8px; border:1px solid #ccc; text-align:center;">${idx+1}</td>
+              <td style="padding:8px 8px; border:1px solid #ccc;">${item.name}</td>
+              <td style="padding:8px 8px; border:1px solid #ccc;">${item.phone}</td>
+              <td style="padding:8px 8px; border:1px solid #ccc;">${formatDate(item.timestamp)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    document.body.appendChild(element);
 
-      doc.autoTable({
-        head: [['ลำดับ', 'ชื่อ', 'เบอร์โทร', 'วันที่ส่ง']],
-        body: tableData,
-        startY: 42,
-        theme: 'grid',
-        styles: { font: 'helvetica', fontSize: 9 },
-        headStyles: { fillColor: [79, 125, 243], textColor: [255, 255, 255], fontStyle: 'bold' },
-        columnStyles: { 0: { cellWidth: 15, halign: 'center' }, 1: { cellWidth: 50 }, 2: { cellWidth: 40 }, 3: { cellWidth: 55 } },
-        didDrawPage: function(data) {
-          // footer
-          const pageCount = doc.internal.getNumberOfPages();
-          doc.setFontSize(8);
-          doc.text(`หน้า ${doc.internal.getCurrentPageInfo().pageNumber} / ${pageCount}`, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 10);
-        }
+    // ใช้ html2pdf แปลง element เป็น PDF
+    html2pdf()
+      .set({
+        margin: 10,
+        filename: `contacts_${new Date().toISOString().slice(0,10)}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      })
+      .from(element)
+      .save()
+      .then(() => {
+        document.body.removeChild(element);
+      })
+      .catch((err) => {
+        document.body.removeChild(element);
+        console.error(err);
+        Swal.fire({ icon:'error', title:'สร้าง PDF ไม่สำเร็จ', text:'กรุณาลองใหม่อีกครั้ง', confirmButtonColor:'#e53e3e' });
       });
-
-      doc.save(`contacts_${new Date().toISOString().slice(0,10)}.pdf`);
-    } catch (e) {
-      console.error(e);
-      Swal.fire({ icon:'error', title:'สร้าง PDF ไม่สำเร็จ', text:'กรุณาตรวจสอบว่ามีการโหลดไลบรารี jsPDF เรียบร้อย', confirmButtonColor:'#e53e3e' });
-    }
   }
 
   // ----- คัดลอกรายชื่อ + เบอร์ (เฉพาะรายการที่กรองอยู่) -----
@@ -763,7 +776,7 @@
 
   // Auto reconnect check
   setInterval(() => { if (!listenerRef) startListening(); }, 60000);
-  console.log('✅ Admin Dashboard started — with PDF & Copy features');
+  console.log('✅ Admin Dashboard started — PDF now supports Thai fonts (html2pdf)');
 </script>
 </body>
 </html>
