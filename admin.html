@@ -9,7 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 
-  <!-- ===== html2pdf สำหรับ Export PDF (รองรับภาษาไทย) ===== -->
+  <!-- ใช้ html2pdf.bundle.min.js ซึ่งมี html2canvas และ jsPDF รวมอยู่ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
@@ -663,39 +663,45 @@
     URL.revokeObjectURL(link.href);
   }
 
-  // ----- Export PDF (ใช้ html2pdf รองรับภาษาไทย) -----
-  function exportPdf() {
+  // ================================================================
+  //  EXPORT PDF ใหม่ ใช้ html2canvas + jsPDF โดยตรง (แทน html2pdf)
+  // ================================================================
+  async function exportPdf() {
     if (allContacts.length === 0) {
       Swal.fire({ icon:'info', title:'ไม่มีข้อมูล', text:'ไม่พบข้อมูลสำหรับสร้าง PDF', confirmButtonColor:'#4f7df3' });
       return;
     }
 
-    // สร้าง element ชั่วคราวสำหรับแปลงเป็น PDF
+    // สร้าง element สำหรับ PDF
     const element = document.createElement('div');
-    element.style.padding = '20px';
-    element.style.fontFamily = "'Kanit', sans-serif";
-    element.style.backgroundColor = '#ffffff';
-    element.style.color = '#1a2639';
+    element.style.cssText = `
+      padding: 12px;
+      font-family: 'Kanit', sans-serif;
+      background: #ffffff;
+      color: #1a2639;
+      width: 700px;
+      margin: 0 auto;
+    `;
     element.innerHTML = `
-      <h2 style="text-align:center; font-weight:600; margin-bottom:8px;">รายงานการส่งข้อมูล (SH-CONTACT)</h2>
-      <p style="text-align:center; margin-bottom:4px;">วันที่ส่งออก: ${new Date().toLocaleString('th-TH')}</p>
-      <p style="text-align:center; margin-bottom:20px;">จำนวนรายการทั้งหมด: ${allContacts.length} รายการ</p>
-      <table style="width:100%; border-collapse: collapse; font-size:14px;">
+      <h2 style="text-align:center; font-weight:600; font-size:18px; margin-bottom:6px;">รายงานการส่งข้อมูล (SH-CONTACT)</h2>
+      <p style="text-align:center; margin-bottom:4px; font-size:12px;">วันที่ส่งออก: ${new Date().toLocaleString('th-TH')}</p>
+      <p style="text-align:center; margin-bottom:16px; font-size:12px;">จำนวนรายการทั้งหมด: ${allContacts.length} รายการ</p>
+      <table style="width:100%; border-collapse:collapse; font-size:10px;">
         <thead>
           <tr style="background:#4f7df3; color:#ffffff;">
-            <th style="padding:10px 8px; border:1px solid #ccc; text-align:center;">ลำดับ</th>
-            <th style="padding:10px 8px; border:1px solid #ccc; text-align:left;">ชื่อ</th>
-            <th style="padding:10px 8px; border:1px solid #ccc; text-align:left;">เบอร์โทร</th>
-            <th style="padding:10px 8px; border:1px solid #ccc; text-align:left;">วันที่ส่ง</th>
+            <th style="padding:4px 6px; border:1px solid #ccc; text-align:center; width:10%;">ลำดับ</th>
+            <th style="padding:4px 6px; border:1px solid #ccc; text-align:left; width:35%;">ชื่อ</th>
+            <th style="padding:4px 6px; border:1px solid #ccc; text-align:left; width:25%;">เบอร์โทร</th>
+            <th style="padding:4px 6px; border:1px solid #ccc; text-align:left; width:30%;">วันที่ส่ง</th>
           </tr>
         </thead>
         <tbody>
           ${allContacts.map((item, idx) => `
             <tr>
-              <td style="padding:8px 8px; border:1px solid #ccc; text-align:center;">${idx+1}</td>
-              <td style="padding:8px 8px; border:1px solid #ccc;">${item.name}</td>
-              <td style="padding:8px 8px; border:1px solid #ccc;">${item.phone}</td>
-              <td style="padding:8px 8px; border:1px solid #ccc;">${formatDate(item.timestamp)}</td>
+              <td style="padding:4px 6px; border:1px solid #ccc; text-align:center;">${idx+1}</td>
+              <td style="padding:4px 6px; border:1px solid #ccc;">${escapeHtml(item.name)}</td>
+              <td style="padding:4px 6px; border:1px solid #ccc;">${escapeHtml(item.phone)}</td>
+              <td style="padding:4px 6px; border:1px solid #ccc;">${formatDate(item.timestamp)}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -703,25 +709,59 @@
     `;
     document.body.appendChild(element);
 
-    // ใช้ html2pdf แปลง element เป็น PDF
-    html2pdf()
-      .set({
-        margin: 10,
-        filename: `contacts_${new Date().toISOString().slice(0,10)}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      })
-      .from(element)
-      .save()
-      .then(() => {
-        document.body.removeChild(element);
-      })
-      .catch((err) => {
-        document.body.removeChild(element);
-        console.error(err);
-        Swal.fire({ icon:'error', title:'สร้าง PDF ไม่สำเร็จ', text:'กรุณาลองใหม่อีกครั้ง', confirmButtonColor:'#e53e3e' });
+    try {
+      // เรียก html2canvas จาก window (มีอยู่ใน bundle)
+      const html2canvas = window.html2canvas;
+      const { jsPDF } = window.jspdf;
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        width: 700,
+        height: element.scrollHeight,
+        logging: false,
       });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();   // 210
+      const pageHeight = pdf.internal.pageSize.getHeight(); // 297
+      const margin = 8; // mm
+      const maxWidth = pageWidth - 2 * margin;   // ~194
+      const maxHeight = pageHeight - 2 * margin; // ~281
+
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = imgWidth / imgHeight;
+
+      let finalWidth = maxWidth;
+      let finalHeight = finalWidth / ratio;
+
+      if (finalHeight > maxHeight) {
+        finalHeight = maxHeight;
+        finalWidth = finalHeight * ratio;
+      }
+
+      // จัดกึ่งกลาง
+      const x = (pageWidth - finalWidth) / 2;
+      const y = (pageHeight - finalHeight) / 2;
+
+      pdf.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
+      pdf.save(`contacts_${new Date().toISOString().slice(0,10)}.pdf`);
+
+      document.body.removeChild(element);
+    } catch (err) {
+      document.body.removeChild(element);
+      console.error(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'สร้าง PDF ไม่สำเร็จ',
+        text: 'กรุณาลองใหม่อีกครั้ง หรือตรวจสอบการเชื่อมต่อ',
+        confirmButtonColor: '#e53e3e'
+      });
+    }
   }
 
   // ----- คัดลอกรายชื่อ + เบอร์ (เฉพาะรายการที่กรองอยู่) -----
@@ -742,7 +782,6 @@
         showConfirmButton: false
       });
     } catch {
-      // fallback
       const ta = document.createElement('textarea');
       ta.value = text;
       document.body.appendChild(ta);
@@ -776,7 +815,7 @@
 
   // Auto reconnect check
   setInterval(() => { if (!listenerRef) startListening(); }, 60000);
-  console.log('✅ Admin Dashboard started — PDF now supports Thai fonts (html2pdf)');
+  console.log('✅ Admin Dashboard started — PDF now uses html2canvas+jsPDF directly');
 </script>
 </body>
 </html>
