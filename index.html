@@ -495,6 +495,9 @@
                             <option value="ไม่ระบุ">ไม่ระบุ</option>
                             <option>กะ A</option>
                             <option>กะ B</option>
+                            <option>คลังสินค้า</option>
+                            <option>จัดส่ง</option>
+                            <option>แม่บ้าน</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -634,6 +637,8 @@
         if (pos === 'พนักงานผลิต') return 'พนักงานผลิต';
         if (pos === 'QC') return 'QC';
         if (pos === 'ช่างเทคนิค' || pos === 'ช่างซ่อมบำรุง') return 'ช่างเทคนิค';
+        if (pos === 'ขับรถ') return 'ขับรถ';
+        if (pos === 'คลังสินค้า') return 'คลังสินค้า';
         return 'อื่นๆ';
     }
 
