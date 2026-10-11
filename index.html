@@ -2,7 +2,16 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover" />
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#0b0f17" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="SH-CONTACT" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png" />
     <title>SH-CONTACT · จัดการพนักงาน</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -387,6 +396,12 @@
         }
         .btn-logout:hover { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.4); }
         @media (max-width: 640px) { .user-bar .user-name { display: none; } }
+        .btn-install {
+            display: none; background: var(--accent-grad); border: 0; color: #fff;
+            border-radius: 10px; padding: 6px 12px; font-family: 'Kanit', sans-serif; font-size: 0.8rem; cursor: pointer;
+        }
+        /* เว้นระยะรอยบาก/แถบด้านล่างของมือถือ เมื่อเปิดแบบแอป */
+        body { padding-top: max(28px, env(safe-area-inset-top)); padding-bottom: max(28px, env(safe-area-inset-bottom)); }
     </style>
 </head>
 <body class="auth-loading">
@@ -402,7 +417,6 @@
             เข้าสู่ระบบด้วย Google
         </button>
         <div class="auth-error" id="authError"></div>
-        <p>ver 4.0</p>
     </div>
 </div>
 
@@ -419,6 +433,7 @@
         <div class="user-bar">
             <img id="userPhoto" alt="" referrerpolicy="no-referrer" style="display:none;" />
             <span class="user-name" id="userName"></span>
+            <button class="btn-install" id="installBtn" type="button"><i class="bi bi-download"></i> ติดตั้งแอป</button>
             <button class="btn-logout" id="logoutBtn" type="button"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</button>
         </div>
     </div>
@@ -1280,6 +1295,46 @@
                 allEmployees = [];
                 filterData();
             }
+        });
+    }
+
+    // ----- PWA: install + service worker -----
+    const installBtn = document.getElementById('installBtn');
+    let deferredInstallPrompt = null;
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        installBtn.style.display = 'inline-block';
+    });
+    window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        installBtn.style.display = 'none';
+    });
+    // iOS ไม่มี install prompt — แสดงปุ่มพร้อมวิธีติดตั้งแทน
+    if (isIOS && !isStandalone) installBtn.style.display = 'inline-block';
+
+    installBtn.addEventListener('click', async () => {
+        if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            installBtn.style.display = 'none';
+        } else if (isIOS) {
+            Swal.fire({
+                title: 'ติดตั้งบน iPhone / iPad',
+                html: 'เปิดด้วย <b>Safari</b> แล้วแตะปุ่ม <b>แชร์</b> <i class="bi bi-box-arrow-up"></i><br>เลือก <b>"เพิ่มไปยังหน้าจอโฮม"</b>',
+                icon: 'info',
+                confirmButtonText: 'เข้าใจแล้ว'
+            });
+        }
+    });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW register failed:', err));
         });
     }
 
