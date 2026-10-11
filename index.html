@@ -497,9 +497,7 @@
                             <option value="ไม่ระบุ">ไม่ระบุ</option>
                             <option>กะ A</option>
                             <option>กะ B</option>
-                            <option>คลังสินค้า</option>
-                            <option>จัดส่ง</option>
-                            <option>แม่บ้าน</option>
+                            <option>ทั่วไป</option>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -639,8 +637,8 @@
         if (pos === 'พนักงานผลิต') return 'พนักงานผลิต';
         if (pos === 'QC') return 'QC';
         if (pos === 'ช่างเทคนิค' || pos === 'ช่างซ่อมบำรุง') return 'ช่างเทคนิค';
-        if (pos === 'ขับรถ') return 'ขับรถ';
-        if (pos === 'คลังสินค้า') return 'คลังสินค้า';
+        if (pos === 'พนักงานขับรถ' || pos === 'พนักงานจัดส่ง') return 'พนักงานจัดส่ง';
+        if (pos === 'พนักงานคลังสินค้า' || pos === 'คลังสินค้า') return 'คลังสินค้า';
         return 'อื่นๆ';
     }
 
@@ -652,27 +650,38 @@
         return getStatus(emp) === STATUS_RESIGNED;
     }
 
+    // Escape database/user-controlled values before inserting them into HTML.
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+    }
+
     // ----- Render -----
     function buildRow(emp, idx) {
         const posClass = getPositionClass(emp.position);
         const posShort = getPositionShort(emp.position);
-        const groupDisplay = emp.group && emp.group.trim() !== '' ? emp.group : '—';
+        const groupValue = String(emp.group ?? '');
+        const groupDisplay = groupValue.trim() !== '' ? groupValue : '—';
         const st = getStatus(emp);
         const stClass = st === STATUS_RESIGNED ? 'resigned' : 'active';
         return `
             <tr>
                 <td style="font-weight:500;color:#718096;">${idx + 1}</td>
-                <td class="text-id">${emp.id}</td>
-                <td style="font-weight:500;">${emp.name}</td>
-                <td><span class="badge-position ${posClass}">${posShort}</span></td>
-                <td><span class="badge-group">${groupDisplay}</span></td>
-                <td class="text-phone">${emp.phone}</td>
-                <td><span class="badge-status ${stClass}">${st}</span></td>
+                <td class="text-id">${escapeHtml(emp.id)}</td>
+                <td style="font-weight:500;">${escapeHtml(emp.name)}</td>
+                <td><span class="badge-position ${posClass}">${escapeHtml(posShort)}</span></td>
+                <td><span class="badge-group">${escapeHtml(groupDisplay)}</span></td>
+                <td class="text-phone">${escapeHtml(emp.phone)}</td>
+                <td><span class="badge-status ${stClass}">${escapeHtml(st)}</span></td>
                 <td>
                     <div class="action-group">
-                        <button class="action-btn call" data-phone="${emp.phone}" title="โทร"><i class="bi bi-telephone-fill"></i></button>
-                        <button class="action-btn edit" data-key="${emp.key}" title="แก้ไข"><i class="bi bi-pencil-square"></i></button>
-                        <button class="action-btn delete" data-key="${emp.key}" title="ลบ"><i class="bi bi-trash3"></i></button>
+                        <button class="action-btn call" data-phone="${escapeHtml(emp.phone)}" title="โทร"><i class="bi bi-telephone-fill"></i></button>
+                        <button class="action-btn edit" data-key="${escapeHtml(emp.key)}" title="แก้ไข"><i class="bi bi-pencil-square"></i></button>
+                        <button class="action-btn delete" data-key="${escapeHtml(emp.key)}" title="ลบ"><i class="bi bi-trash3"></i></button>
                     </div>
                 </td>
             </tr>
@@ -715,10 +724,9 @@
 
         if (currentFilter !== 'all') {
             if (currentFilter === 'อื่นๆ') {
-                filtered = filtered.filter(e => {
-                    const cat = getCategory(e.position);
-                    return cat !== 'หัวหน้ากะ' && cat !== 'พนักงานผลิต' && cat !== 'QC' && cat !== 'ช่างเทคนิค';
-                });
+                // แสดงเฉพาะตำแหน่งที่ getCategory จัดเป็น 'อื่นๆ' จริง ๆ
+                // เพื่อไม่ให้พนักงานขับรถ/จัดส่ง/คลังสินค้า หลุดเข้ามาในหมวดนี้
+                filtered = filtered.filter(e => getCategory(String(e.position || '').trim()) === 'อื่นๆ');
             } else if (currentFilter === 'หัวหน้ากะ') {
                 filtered = filtered.filter(e => e.position === 'หัวหน้ากะ');
             } else if (currentFilter === 'พนักงานผลิต') {
@@ -727,7 +735,12 @@
                 filtered = filtered.filter(e => e.position === 'QC');
             } else if (currentFilter === 'ช่างเทคนิค') {
                 filtered = filtered.filter(e => e.position === 'ช่างเทคนิค' || e.position === 'ช่างซ่อมบำรุง');
+            } else if (currentFilter === 'คลังสินค้า' || currentFilter === 'พนักงานคลังสินค้า') {
+                filtered = filtered.filter(e => e.position === 'พนักงานคลังสินค้า');
+            } else if (currentFilter === 'ขับรถ' || currentFilter === 'พนักงานขับรถ') {
+                filtered = filtered.filter(e => e.position === 'พนักงานขับรถ' || e.position === 'พนักงานจัดส่ง');
             }
+            
         }
 
         if (currentSearch.trim() !== '') {
@@ -761,6 +774,7 @@
                 timer: 2000,
                 showConfirmButton: false
             });
+            return true;
         } catch (err) {
             console.error('Add error:', err);
             await Swal.fire({
@@ -769,6 +783,7 @@
                 text: err.message || 'กรุณาลองอีกครั้ง',
                 confirmButtonColor: '#e53e3e'
             });
+            return false;
         }
     }
 
@@ -782,6 +797,7 @@
                 timer: 2000,
                 showConfirmButton: false
             });
+            return true;
         } catch (err) {
             console.error('Update error:', err);
             await Swal.fire({
@@ -790,6 +806,7 @@
                 text: err.message || 'กรุณาลองอีกครั้ง',
                 confirmButtonColor: '#e53e3e'
             });
+            return false;
         }
     }
 
@@ -836,13 +853,17 @@
         isResetting = true;
 
         const result = await Swal.fire({
-            title: 'รีเซ็ทพนักงาน',
-            text: 'คุณต้องการลบข้อมูลพนักงานทั้งหมด และแทนที่ด้วยข้อมูลเริ่มต้น ใช่หรือไม่?',
+            title: 'รีเซ็ทพนักงานทั้งหมด',
+            html: 'การทำรายการนี้จะแทนที่ข้อมูลพนักงานปัจจุบันด้วยข้อมูลเริ่มต้น<br><strong>ระบบจะดาวน์โหลดไฟล์สำรองก่อนดำเนินการ</strong><br>พิมพ์ <code>RESET</code> เพื่อยืนยัน',
+            input: 'text',
+            inputPlaceholder: 'พิมพ์ RESET',
+            inputAttributes: { autocapitalize: 'off', autocomplete: 'off' },
+            inputValidator: (value) => value !== 'RESET' ? 'กรุณาพิมพ์ RESET ให้ตรงตามตัวพิมพ์ใหญ่' : undefined,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dd6b20',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'รีเซ็ท',
+            confirmButtonText: 'สำรองและรีเซ็ท',
             cancelButtonText: 'ยกเลิก'
         });
 
@@ -858,10 +879,25 @@
         resetBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> กำลัง...';
 
         try {
-            // Clear all data
-            await set(employeesRef, null);
+            // อ่านและดาวน์โหลดข้อมูลสำรองก่อนเปลี่ยนข้อมูลจริง
+            const backupSnapshot = await get(employeesRef);
+            const backupData = backupSnapshot.exists() ? backupSnapshot.val() : {};
+            const backupBlob = new Blob([JSON.stringify({
+                exportedAt: new Date().toISOString(),
+                databasePath: 'employees',
+                employees: backupData
+            }, null, 2)], { type: 'application/json;charset=utf-8' });
+            const backupUrl = URL.createObjectURL(backupBlob);
+            const backupLink = document.createElement('a');
+            backupLink.href = backupUrl;
+            backupLink.download = `sh-contact-employees-backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+            document.body.appendChild(backupLink);
+            backupLink.click();
+            backupLink.remove();
+            setTimeout(() => URL.revokeObjectURL(backupUrl), 1000);
 
-            // Upload seed data using push (ทุกคนมีสถานะ "ทำงาน" เป็นค่าเริ่มต้น)
+            // เตรียมข้อมูลเริ่มต้นไว้ก่อน แล้วเขียนทับด้วยคำสั่งเดียว
+            // ลดความเสี่ยงล้างข้อมูลแล้วเพิ่มกลับได้เพียงบางส่วน
             const seedEmployees = [
                 { id: "680303001", name: "ปิญาพร ทองสำอางค์", position: "หัวหน้ากะ", group: "กะ A", phone: "062-196-6115" },
                 { id: "671126001", name: "น้ำฝน อนันต์มั่นคง", position: "พนักงานผลิต", group: "กะ A", phone: "062-497-7860" },
@@ -892,18 +928,21 @@
                 { id: "680617001", name: "สุรศักดิ์ เที่ยงตรง", position: "ช่างเทคนิค", group: "ไม่ระบุ", phone: "063-771-3115" },
                 { id: "680701001", name: "เสกสรร ตะเพียนทอง", position: "ช่างเทคนิค", group: "ไม่ระบุ", phone: "081-114-7384" },
                 { id: "690129002", name: "สุมินทร์ ปลั่งกลาง", position: "ช่างซ่อมบำรุง", group: "ไม่ระบุ", phone: "095-136-6141" },
-                { id: "680811001", name: "ณัฐพล โสภา", position: "พนักงานขับรถ", group: "ไม่ระบุ", phone: "098-318-8850" },
-                { id: "690105001", name: "คุณากร แซ่ไหล", position: "พนักงานขับรถ", group: "ไม่ระบุ", phone: "080-152-0533" },
-                { id: "690202001", name: "กฤษณะ นุชอิ่ม", position: "พนักงานจัดส่ง", group: "ไม่ระบุ", phone: "065-492-3187" },
-                { id: "680818001", name: "โญธิกา เพชนิล", position: "พนักงานคลังสินค้า", group: "ไม่ระบุ", phone: "092-994-9493" },
-                { id: "690506002", name: "อติเทพ คำนุ", position: "พนักงานคลังสินค้า", group: "ไม่ระบุ", phone: "092-613-5049" },
+                { id: "680811001", name: "ณัฐพล โสภา", position: "พนักงานขับรถ", group: "พนักงานขับรถ", phone: "098-318-8850" },
+                { id: "690105001", name: "คุณากร แซ่ไหล", position: "พนักงานขับรถ", group: "พนักงานขับรถ", phone: "080-152-0533" },
+                { id: "690202001", name: "กฤษณะ นุชอิ่ม", position: "พนักงานจัดส่ง", group: "พนักงานจัดส่ง", phone: "065-492-3187" },
+                { id: "680818001", name: "โญธิกา เพชนิล", position: "พนักงานคลังสินค้า", group: "พนักงานคลังสินค้า", phone: "092-994-9493" },
+                { id: "690506002", name: "อติเทพ คำนุ", position: "พนักงานคลังสินค้า", group: "พนักงานคลังสินค้า", phone: "092-613-5049" },
                 { id: "671126002", name: "นรนัฐ มัจฉา", position: "แม่บ้าน", group: "ไม่ระบุ", phone: "092-494-9113" },
                 { id: "690126001", name: "พรวิไลลักษณ์ ใจใส", position: "แม่บ้าน", group: "ไม่ระบุ", phone: "063-093-4809" }
             ].map(e => ({ ...e, status: e.status || STATUS_ACTIVE }));
 
+            const replacementData = {};
             for (const emp of seedEmployees) {
-                await push(employeesRef, emp);
+                const employeeRef = push(employeesRef);
+                replacementData[employeeRef.key] = emp;
             }
+            await set(employeesRef, replacementData);
 
             await Swal.fire({
                 icon: 'success',
@@ -962,6 +1001,8 @@
 
     // ----- Save (Add or Update) -----
     async function handleSave() {
+        const form = document.getElementById('employeeForm');
+        if (!form.reportValidity()) return;
         const key = editKeyInput.value;
         const id = inputId.value.trim();
         const name = inputName.value.trim();
@@ -979,17 +1020,31 @@
             return;
         }
 
+        // รหัสพนักงานต้องไม่ซ้ำ (ยกเว้นรายการเดิมที่กำลังแก้ไข)
+        const normalizedId = id.toLocaleLowerCase();
+        const duplicate = allEmployees.find(emp =>
+            String(emp.id ?? '').trim().toLocaleLowerCase() === normalizedId && emp.key !== key
+        );
+        if (duplicate) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'รหัสพนักงานซ้ำ',
+                text: `รหัส ${id} ถูกใช้โดย ${duplicate.name || 'พนักงานคนอื่น'} แล้ว`,
+                confirmButtonColor: '#4f7df3'
+            });
+            return;
+        }
+
         const data = { id, name, position, group, phone, status };
 
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> กำลังบันทึก...';
 
         try {
-            if (key) {
-                await updateEmployee(key, data);
-            } else {
-                await addEmployee(data);
-            }
+            const saved = key
+                ? await updateEmployee(key, data)
+                : await addEmployee(data);
+            if (!saved) return;
             modal.hide();
 
             // ถ้าบันทึกเป็น "ลาออก" ให้เปิดส่วนพนักงานที่ลาออกให้เห็นทันที
@@ -997,7 +1052,8 @@
                 expandResigned(true);
             }
         } catch (err) {
-            // Error already handled in functions
+            console.error('Save error:', err);
+            await Swal.fire({ icon: 'error', title: 'บันทึกไม่สำเร็จ', text: err.message || 'กรุณาลองอีกครั้ง' });
         } finally {
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="bi bi-check-lg"></i> บันทึก';
@@ -1018,7 +1074,7 @@
             const callBtn = e.target.closest('.call');
             if (callBtn) {
                 e.stopPropagation();
-                const phone = (callBtn.dataset.phone || '').replace(/-/g, '');
+                const phone = (callBtn.dataset.phone || '').replace(/[^0-9+]/g, '');
                 if (phone) window.location.href = `tel:${phone}`;
                 return;
             }
@@ -1044,7 +1100,7 @@
         onValue(employeesRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                allEmployees = Object.entries(data).map(([key, value]) => ({ key, ...value }));
+                allEmployees = Object.entries(data).filter(([, value]) => value && typeof value === 'object').map(([key, value]) => ({ ...value, key }));
                 syncStatus.className = 'upload-badge synced';
                 syncStatus.innerHTML = '<i class="bi bi-check-circle-fill"></i> พร้อมใช้งาน';
                 const now = new Date();
