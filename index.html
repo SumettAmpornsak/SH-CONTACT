@@ -96,6 +96,7 @@
         .stat-item.qc .stat-number { color: var(--green); }
         .stat-item.tech .stat-number { color: #fb923c; }
         .stat-item.other .stat-number { color: #c084fc; }
+        .stat-item.resigned .stat-number { color: var(--red); }
 
         .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center; }
         .toolbar .search-box { flex: 1 1 240px; position: relative; }
@@ -148,6 +149,39 @@
         .btn-reset { background: var(--orange-grad); box-shadow: 0 4px 16px rgba(251,191,36,0.2); }
         .btn-reset:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(251,191,36,0.3); }
 
+        /* ---------- Section headers ---------- */
+        .section-head {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 10px; margin: 22px 2px 10px;
+        }
+        .section-title {
+            font-size: 0.92rem; font-weight: 600; color: var(--text-1);
+            margin: 0; display: flex; align-items: center; gap: 8px;
+        }
+        .section-title i { font-size: 1rem; color: var(--accent); }
+        .section-title.resigned-title i { color: var(--red); }
+        .section-count {
+            display: inline-block; padding: 2px 12px; border-radius: 30px;
+            font-size: 0.7rem; font-weight: 600; font-feature-settings: "tnum";
+            background: rgba(52,211,153,0.12); color: #6ee7b7; border: 1px solid rgba(52,211,153,0.25);
+        }
+        .section-count.resigned { background: rgba(248,113,113,0.12); color: #fca5a5; border-color: rgba(248,113,113,0.25); }
+
+        .section-head-btn {
+            width: 100%; background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            padding: 13px 16px; cursor: pointer;
+            font-family: 'Kanit', sans-serif;
+            transition: all 0.2s; margin-bottom: 10px;
+        }
+        .section-head-btn:hover { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.25); }
+        .toggle-chevron { color: var(--text-3); transition: transform 0.28s ease; font-size: 1rem; }
+        .section-head-btn[aria-expanded="true"] .toggle-chevron { transform: rotate(180deg); }
+        .resigned-wrap { display: none; }
+        .resigned-wrap.show { display: block; animation: fadeSlide 0.28s ease; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+
         .table-wrap {
             overflow-x: auto;
             border-radius: var(--radius-md);
@@ -161,7 +195,7 @@
         .table {
             margin: 0; font-size: 0.88rem; font-family: 'Kanit', sans-serif;
             border-collapse: separate; border-spacing: 0;
-            width: 100%; min-width: 750px; color: var(--text-1);
+            width: 100%; min-width: 850px; color: var(--text-1);
         }
         .table thead th {
             background: rgba(110,139,255,0.06);
@@ -192,6 +226,14 @@
         .table tbody td:last-child { box-shadow: -8px 0 16px rgba(0,0,0,0.35); border-left: 1px solid var(--border-soft); }
         .table tbody tr:hover td:last-child { background: #182236; }
 
+        /* --- ตารางพนักงานที่ลาออก (แสดงแบบจางลง) --- */
+        .table-resigned tbody td { color: var(--text-2); }
+        .table-resigned tbody td:last-child { background: #141a26; }
+        .table-resigned tbody tr:hover td:last-child { background: #182236; }
+        .table-resigned .badge-position { opacity: 0.7; }
+        .table-resigned .text-phone { color: var(--text-3); }
+        .table-resigned .text-id { color: var(--text-3); opacity: 0.8; }
+
         .badge-position { display: inline-block; padding: 3px 12px; border-radius: 30px; font-size: 0.68rem; font-weight: 500; white-space: nowrap; border: 1px solid transparent; }
         .badge-position.supervisor  { background: rgba(96,165,250,0.12);  color: #7eb6fb; border-color: rgba(96,165,250,0.25); }
         .badge-position.production  { background: rgba(45,212,191,0.12);  color: #5eead4; border-color: rgba(45,212,191,0.25); }
@@ -206,6 +248,9 @@
             display: inline-block; padding: 3px 10px; border-radius: 30px; font-size: 0.68rem; font-weight: 500;
             background: rgba(255,255,255,0.05); color: var(--text-2); white-space: nowrap;
         }
+        .badge-status { display: inline-block; padding: 3px 12px; border-radius: 30px; font-size: 0.68rem; font-weight: 600; white-space: nowrap; border: 1px solid transparent; }
+        .badge-status.active   { background: rgba(52,211,153,0.12);  color: #6ee7b7; border-color: rgba(52,211,153,0.25); }
+        .badge-status.resigned { background: rgba(248,113,113,0.12); color: #fca5a5; border-color: rgba(248,113,113,0.25); }
         .text-phone { font-weight: 500; color: var(--text-1); letter-spacing: 0.3px; white-space: nowrap; }
         .text-id { font-size: 0.78rem; color: var(--text-3); font-weight: 400; font-feature-settings: "tnum"; white-space: nowrap; }
 
@@ -257,6 +302,7 @@
             color: var(--text-1);
         }
         .form-select option { background: #131826; color: var(--text-1); }
+        .form-hint { font-size: 0.72rem; color: var(--text-3); margin-top: 6px; }
         .btn-primary {
             background: var(--accent-grad); border: none; border-radius: 30px;
             padding: 9px 24px; font-weight: 500; font-family: 'Kanit', sans-serif;
@@ -270,7 +316,7 @@
         .btn-secondary:hover { background: rgba(255,255,255,0.1); color: var(--text-1); }
 
         @media (max-width: 480px) {
-            .table { font-size: 0.8rem; min-width: 600px; }
+            .table { font-size: 0.8rem; min-width: 680px; }
             .table thead th, .table tbody td { padding: 8px 4px; }
             .stats-grid { grid-template-columns: repeat(3, 1fr); }
             .stat-number { font-size: 1.25rem; }
@@ -314,18 +360,19 @@
 
     <!-- Stats -->
     <div class="stats-grid" data-aos="fade-up" data-aos-delay="150">
-        <div class="stat-item total"><div class="stat-number" id="statTotal">0</div><div class="stat-label">ทั้งหมด</div></div>
+        <div class="stat-item total"><div class="stat-number" id="statTotal">0</div><div class="stat-label">ทำงานอยู่</div></div>
         <div class="stat-item prod"><div class="stat-number" id="statProd">0</div><div class="stat-label">ผลิต</div></div>
         <div class="stat-item qc"><div class="stat-number" id="statQC">0</div><div class="stat-label">QC</div></div>
         <div class="stat-item tech"><div class="stat-number" id="statTech">0</div><div class="stat-label">ช่าง</div></div>
         <div class="stat-item other"><div class="stat-number" id="statOther">0</div><div class="stat-label">อื่น ๆ</div></div>
+        <div class="stat-item resigned"><div class="stat-number" id="statResigned">0</div><div class="stat-label">ลาออก</div></div>
     </div>
 
     <!-- Toolbar -->
     <div class="toolbar" data-aos="fade-up" data-aos-delay="200">
         <div class="search-box">
             <i class="bi bi-search"></i>
-            <input type="text" id="searchInput" placeholder="ค้นหาชื่อ, รหัส, ตำแหน่ง..." />
+            <input type="text" id="searchInput" placeholder="ค้นหาชื่อ, รหัส, ตำแหน่ง, สถานะ..." />
         </div>
         <div class="filter-group" id="filterGroup">
             <span class="badge-filter active" data-filter="all">ทั้งหมด</span>
@@ -343,7 +390,12 @@
         </button>
     </div>
 
-    <!-- Table -->
+    <!-- ===== ส่วนที่ 1 : พนักงานที่ทำงานอยู่ ===== -->
+    <div class="section-head" data-aos="fade-up" data-aos-delay="220">
+        <h6 class="section-title"><i class="bi bi-person-check-fill"></i> พนักงานที่ทำงานอยู่
+            <span class="section-count" id="activeCount">0 คน</span>
+        </h6>
+    </div>
     <div class="table-wrap" data-aos="fade-up" data-aos-delay="250">
         <table class="table">
             <thead>
@@ -354,17 +406,50 @@
                     <th style="min-width:110px;">ตำแหน่ง</th>
                     <th style="min-width:80px;">กลุ่มงาน</th>
                     <th style="min-width:120px;">เบอร์โทร</th>
+                    <th style="min-width:90px;">สถานะ</th>
                     <th style="min-width:140px;">จัดการ</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <tr><td colspan="7" class="empty-state"><i class="bi bi-hourglass-split"></i> กำลังโหลดข้อมูล...</td></tr>
+                <tr><td colspan="8" class="empty-state"><i class="bi bi-hourglass-split"></i> กำลังโหลดข้อมูล...</td></tr>
             </tbody>
         </table>
     </div>
 
+    <!-- ===== ส่วนที่ 2 : พนักงานที่ลาออก (แยกออกมา) ===== -->
+    <div data-aos="fade-up" data-aos-delay="300" style="margin-top:26px;">
+        <button class="section-head-btn" id="toggleResigned" type="button" aria-expanded="false" aria-controls="resignedWrap">
+            <div class="section-head" style="margin:0;">
+                <h6 class="section-title resigned-title">
+                    <i class="bi bi-person-dash-fill"></i> พนักงานที่ลาออกแล้ว
+                    <span class="section-count resigned" id="resignedCount">0 คน</span>
+                </h6>
+                <i class="bi bi-chevron-down toggle-chevron"></i>
+            </div>
+        </button>
+        <div class="table-wrap resigned-wrap" id="resignedWrap">
+            <table class="table table-resigned">
+                <thead>
+                    <tr>
+                        <th style="width:50px;">#</th>
+                        <th style="min-width:120px;">รหัส</th>
+                        <th style="min-width:140px;">ชื่อ-สกุล</th>
+                        <th style="min-width:110px;">ตำแหน่ง</th>
+                        <th style="min-width:80px;">กลุ่มงาน</th>
+                        <th style="min-width:120px;">เบอร์โทร</th>
+                        <th style="min-width:90px;">สถานะ</th>
+                        <th style="min-width:140px;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBodyResigned">
+                    <tr><td colspan="8" class="empty-state"><i class="bi bi-person-dash"></i><div>ไม่มีพนักงานที่ลาออก</div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <!-- Footer -->
-    <div style="margin-top:16px; font-size:0.75rem; color:#a0aec0; text-align:center; border-top:1px solid rgba(0,0,0,0.04); padding-top:14px;" data-aos="fade-up" data-aos-delay="300">
+    <div style="margin-top:16px; font-size:0.75rem; color:#a0aec0; text-align:center; border-top:1px solid rgba(0,0,0,0.04); padding-top:14px;" data-aos="fade-up" data-aos-delay="320">
         <i class="bi bi-database"></i> ข้อมูลถูกจัดเก็บใน Firebase Realtime Database
         <span id="syncTime" style="margin-left:10px;"></span>
     </div>
@@ -416,6 +501,14 @@
                         <label class="form-label">เบอร์โทร</label>
                         <input type="text" class="form-control" id="inputPhone" placeholder="062-196-6115" required />
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">สถานะพนักงาน</label>
+                        <select class="form-select" id="inputStatus" required>
+                            <option value="ทำงาน">ทำงาน</option>
+                            <option value="ลาออก">ลาออก</option>
+                        </select>
+                        <div class="form-hint"><i class="bi bi-info-circle"></i> พนักงานที่เลือก "ลาออก" จะถูกย้ายไปอยู่ในส่วน "พนักงานที่ลาออกแล้ว" ด้านล่างตารางหลัก</div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -466,21 +559,31 @@
     let allEmployees = [];
     let currentFilter = 'all';
     let currentSearch = '';
-    let isResetting = false; // prevent multiple resets
+    let isResetting = false;   // prevent multiple resets
+    let editingMode = false;   // prevent modal reset while opening edit
+
+    const STATUS_ACTIVE = 'ทำงาน';
+    const STATUS_RESIGNED = 'ลาออก';
 
     // ----- DOM refs -----
     const tbody = document.getElementById('tableBody');
+    const tbodyResigned = document.getElementById('tableBodyResigned');
     const statTotal = document.getElementById('statTotal');
     const statProd = document.getElementById('statProd');
     const statQC = document.getElementById('statQC');
     const statTech = document.getElementById('statTech');
     const statOther = document.getElementById('statOther');
+    const statResigned = document.getElementById('statResigned');
     const totalLabel = document.getElementById('totalLabel');
     const syncStatus = document.getElementById('syncStatus');
     const syncTime = document.getElementById('syncTime');
     const searchInput = document.getElementById('searchInput');
     const filterGroup = document.getElementById('filterGroup');
     const resetBtn = document.getElementById('resetBtn');
+    const activeCount = document.getElementById('activeCount');
+    const resignedCount = document.getElementById('resignedCount');
+    const toggleResigned = document.getElementById('toggleResigned');
+    const resignedWrap = document.getElementById('resignedWrap');
 
     // Modal refs
     const modalEl = document.getElementById('employeeModal');
@@ -492,6 +595,7 @@
     const inputPosition = document.getElementById('inputPosition');
     const inputGroup = document.getElementById('inputGroup');
     const inputPhone = document.getElementById('inputPhone');
+    const inputStatus = document.getElementById('inputStatus');
     const saveBtn = document.getElementById('saveEmployeeBtn');
 
     // ----- Helpers -----
@@ -533,72 +637,75 @@
         return 'อื่นๆ';
     }
 
+    // สถานะพนักงาน (รองรับข้อมูลเก่าที่ไม่มีฟิลด์ status = ถือว่า "ทำงาน")
+    function getStatus(emp) {
+        return (emp && emp.status && String(emp.status).trim() !== '') ? emp.status : STATUS_ACTIVE;
+    }
+    function isResigned(emp) {
+        return getStatus(emp) === STATUS_RESIGNED;
+    }
+
     // ----- Render -----
-    function renderTable(data) {
-        if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><i class="bi bi-inbox"></i><div>ไม่พบข้อมูล</div></td></tr>`;
+    function buildRow(emp, idx) {
+        const posClass = getPositionClass(emp.position);
+        const posShort = getPositionShort(emp.position);
+        const groupDisplay = emp.group && emp.group.trim() !== '' ? emp.group : '—';
+        const st = getStatus(emp);
+        const stClass = st === STATUS_RESIGNED ? 'resigned' : 'active';
+        return `
+            <tr>
+                <td style="font-weight:500;color:#718096;">${idx + 1}</td>
+                <td class="text-id">${emp.id}</td>
+                <td style="font-weight:500;">${emp.name}</td>
+                <td><span class="badge-position ${posClass}">${posShort}</span></td>
+                <td><span class="badge-group">${groupDisplay}</span></td>
+                <td class="text-phone">${emp.phone}</td>
+                <td><span class="badge-status ${stClass}">${st}</span></td>
+                <td>
+                    <div class="action-group">
+                        <button class="action-btn call" data-phone="${emp.phone}" title="โทร"><i class="bi bi-telephone-fill"></i></button>
+                        <button class="action-btn edit" data-key="${emp.key}" title="แก้ไข"><i class="bi bi-pencil-square"></i></button>
+                        <button class="action-btn delete" data-key="${emp.key}" title="ลบ"><i class="bi bi-trash3"></i></button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    function renderList(targetEl, list, resigned) {
+        if (!list || list.length === 0) {
+            targetEl.innerHTML = resigned
+                ? `<tr><td colspan="8" class="empty-state"><i class="bi bi-person-dash"></i><div>ไม่มีพนักงานที่ลาออก</div></td></tr>`
+                : `<tr><td colspan="8" class="empty-state"><i class="bi bi-inbox"></i><div>ไม่พบข้อมูลพนักงาน</div></td></tr>`;
             return;
         }
-        let html = '';
-        data.forEach((emp, idx) => {
-            const posClass = getPositionClass(emp.position);
-            const posShort = getPositionShort(emp.position);
-            const groupDisplay = emp.group && emp.group.trim() !== '' ? emp.group : '—';
-            html += `
-                <tr>
-                    <td style="font-weight:500;color:#718096;">${idx + 1}</td>
-                    <td class="text-id">${emp.id}</td>
-                    <td style="font-weight:500;">${emp.name}</td>
-                    <td><span class="badge-position ${posClass}">${posShort}</span></td>
-                    <td><span class="badge-group">${groupDisplay}</span></td>
-                    <td class="text-phone">${emp.phone}</td>
-                    <td>
-                        <div class="action-group">
-                            <button class="action-btn call" data-phone="${emp.phone}" title="โทร"><i class="bi bi-telephone-fill"></i></button>
-                            <button class="action-btn edit" data-key="${emp.key}" data-bs-toggle="modal" data-bs-target="#employeeModal" title="แก้ไข"><i class="bi bi-pencil-square"></i></button>
-                            <button class="action-btn delete" data-key="${emp.key}" title="ลบ"><i class="bi bi-trash3"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-        tbody.innerHTML = html;
-
-        // Event: Call
-        tbody.querySelectorAll('.call').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const phone = btn.dataset.phone.replace(/-/g, '');
-                if (phone) {
-                    window.location.href = `tel:${phone}`;
-                }
-            });
-        });
-
-        // Event: Delete
-        tbody.querySelectorAll('.delete').forEach(btn => {
-            btn.addEventListener('click', () => deleteEmployee(btn.dataset.key));
-        });
+        targetEl.innerHTML = list.map((emp, idx) => buildRow(emp, idx)).join('');
     }
 
     // Update stats
-    function updateStats(data) {
-        const total = data.length;
-        const prod = data.filter(e => e.position === 'พนักงานผลิต').length;
-        const qc = data.filter(e => e.position === 'QC').length;
-        const tech = data.filter(e => e.position === 'ช่างเทคนิค' || e.position === 'ช่างซ่อมบำรุง').length;
+    function updateStats(activeList, resignedList) {
+        const total = activeList.length;
+        const prod = activeList.filter(e => e.position === 'พนักงานผลิต').length;
+        const qc = activeList.filter(e => e.position === 'QC').length;
+        const tech = activeList.filter(e => e.position === 'ช่างเทคนิค' || e.position === 'ช่างซ่อมบำรุง').length;
         const other = total - prod - qc - tech;
+
         statTotal.textContent = total;
         statProd.textContent = prod;
         statQC.textContent = qc;
         statTech.textContent = tech;
         statOther.textContent = other;
-        totalLabel.textContent = `(${total} คน)`;
+        statResigned.textContent = resignedList.length;
+
+        activeCount.textContent = `${total} คน`;
+        resignedCount.textContent = `${resignedList.length} คน`;
+        totalLabel.textContent = `(ทำงาน ${total} คน · ลาออก ${resignedList.length} คน)`;
     }
 
     // ----- Filter & Search -----
     function filterData() {
         let filtered = allEmployees;
+
         if (currentFilter !== 'all') {
             if (currentFilter === 'อื่นๆ') {
                 filtered = filtered.filter(e => {
@@ -615,18 +722,25 @@
                 filtered = filtered.filter(e => e.position === 'ช่างเทคนิค' || e.position === 'ช่างซ่อมบำรุง');
             }
         }
+
         if (currentSearch.trim() !== '') {
             const q = currentSearch.trim().toLowerCase();
             filtered = filtered.filter(e =>
-                e.name.toLowerCase().includes(q) ||
-                e.id.toLowerCase().includes(q) ||
-                e.position.toLowerCase().includes(q) ||
-                e.group.toLowerCase().includes(q) ||
-                e.phone.includes(q)
+                (e.name || '').toLowerCase().includes(q) ||
+                (e.id || '').toLowerCase().includes(q) ||
+                (e.position || '').toLowerCase().includes(q) ||
+                (e.group || '').toLowerCase().includes(q) ||
+                (e.phone || '').includes(q) ||
+                getStatus(e).toLowerCase().includes(q)
             );
         }
-        renderTable(filtered);
-        updateStats(filtered);
+
+        const activeList = filtered.filter(e => !isResigned(e));
+        const resignedList = filtered.filter(e => isResigned(e));
+
+        renderList(tbody, activeList, false);
+        renderList(tbodyResigned, resignedList, true);
+        updateStats(activeList, resignedList);
     }
 
     // ----- CRUD Operations with SweetAlert -----
@@ -740,7 +854,7 @@
             // Clear all data
             await set(employeesRef, null);
 
-            // Upload seed data using push
+            // Upload seed data using push (ทุกคนมีสถานะ "ทำงาน" เป็นค่าเริ่มต้น)
             const seedEmployees = [
                 { id: "680303001", name: "ปิญาพร ทองสำอางค์", position: "หัวหน้ากะ", group: "กะ A", phone: "062-196-6115" },
                 { id: "671126001", name: "น้ำฝน อนันต์มั่นคง", position: "พนักงานผลิต", group: "กะ A", phone: "062-497-7860" },
@@ -778,7 +892,7 @@
                 { id: "690506002", name: "อติเทพ คำนุ", position: "พนักงานคลังสินค้า", group: "ไม่ระบุ", phone: "092-613-5049" },
                 { id: "671126002", name: "นรนัฐ มัจฉา", position: "แม่บ้าน", group: "ไม่ระบุ", phone: "092-494-9113" },
                 { id: "690126001", name: "พรวิไลลักษณ์ ใจใส", position: "แม่บ้าน", group: "ไม่ระบุ", phone: "063-093-4809" }
-            ];
+            ].map(e => ({ ...e, status: e.status || STATUS_ACTIVE }));
 
             for (const emp of seedEmployees) {
                 await push(employeesRef, emp);
@@ -816,6 +930,7 @@
 
     // ----- Modal handlers -----
     function openEditModal(emp) {
+        editingMode = true;
         modalTitle.innerHTML = '<i class="bi bi-pencil-square"></i> แก้ไขพนักงาน';
         editKeyInput.value = emp.key;
         inputId.value = emp.id;
@@ -823,6 +938,7 @@
         inputPosition.value = emp.position;
         inputGroup.value = emp.group || 'ไม่ระบุ';
         inputPhone.value = emp.phone;
+        inputStatus.value = getStatus(emp);
         modal.show();
     }
 
@@ -834,6 +950,7 @@
         inputPosition.value = '';
         inputGroup.value = 'ไม่ระบุ';
         inputPhone.value = '';
+        inputStatus.value = STATUS_ACTIVE;
     }
 
     // ----- Save (Add or Update) -----
@@ -844,6 +961,7 @@
         const position = inputPosition.value;
         const group = inputGroup.value.trim();
         const phone = inputPhone.value.trim();
+        const status = inputStatus.value || STATUS_ACTIVE;
 
         if (!id || !name || !position || !phone) {
             await Swal.fire({
@@ -854,7 +972,7 @@
             return;
         }
 
-        const data = { id, name, position, group, phone };
+        const data = { id, name, position, group, phone, status };
 
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> กำลังบันทึก...';
@@ -866,12 +984,52 @@
                 await addEmployee(data);
             }
             modal.hide();
+
+            // ถ้าบันทึกเป็น "ลาออก" ให้เปิดส่วนพนักงานที่ลาออกให้เห็นทันที
+            if (status === STATUS_RESIGNED) {
+                expandResigned(true);
+            }
         } catch (err) {
             // Error already handled in functions
         } finally {
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="bi bi-check-lg"></i> บันทึก';
         }
+    }
+
+    // ----- Resigned section toggle -----
+    function expandResigned(expand) {
+        const isOpen = toggleResigned.getAttribute('aria-expanded') === 'true';
+        const next = (typeof expand === 'boolean') ? expand : !isOpen;
+        toggleResigned.setAttribute('aria-expanded', String(next));
+        resignedWrap.classList.toggle('show', next);
+    }
+
+    // ----- Table event delegation (bind once) -----
+    function bindTableEvents(targetEl) {
+        targetEl.addEventListener('click', (e) => {
+            const callBtn = e.target.closest('.call');
+            if (callBtn) {
+                e.stopPropagation();
+                const phone = (callBtn.dataset.phone || '').replace(/-/g, '');
+                if (phone) window.location.href = `tel:${phone}`;
+                return;
+            }
+
+            const editBtn = e.target.closest('.edit');
+            if (editBtn) {
+                e.stopPropagation();
+                const emp = allEmployees.find(x => x.key === editBtn.dataset.key);
+                if (emp) openEditModal(emp);
+                return;
+            }
+
+            const delBtn = e.target.closest('.delete');
+            if (delBtn) {
+                e.stopPropagation();
+                deleteEmployee(delBtn.dataset.key);
+            }
+        });
     }
 
     // ----- Real-time listener -----
@@ -926,28 +1084,12 @@
         });
 
         // Modal events
-        modalEl.addEventListener('show.bs.modal', (e) => {
-            const trigger = e.relatedTarget;
-            if (trigger && trigger.classList.contains('edit')) {
-                // handled by edit button click
-            } else {
-                resetModal();
-            }
-        });
-
-        // Custom edit click handler
-        tbody.addEventListener('click', (e) => {
-            const editBtn = e.target.closest('.edit');
-            if (editBtn) {
-                const key = editBtn.dataset.key;
-                const emp = allEmployees.find(e => e.key === key);
-                if (emp) {
-                    openEditModal(emp);
-                }
-            }
+        modalEl.addEventListener('show.bs.modal', () => {
+            if (!editingMode) resetModal();
         });
 
         modalEl.addEventListener('hidden.bs.modal', () => {
+            editingMode = false;
             resetModal();
         });
 
@@ -961,11 +1103,19 @@
         });
 
         document.querySelector('.btn-add').addEventListener('click', () => {
+            editingMode = false;
             resetModal();
         });
 
         // Reset button
         resetBtn.addEventListener('click', resetEmployees);
+
+        // Toggle resigned section
+        toggleResigned.addEventListener('click', () => expandResigned());
+
+        // Table events (delegation – bind once)
+        bindTableEvents(tbody);
+        bindTableEvents(tbodyResigned);
     }
 
     init();
